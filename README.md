@@ -5,23 +5,30 @@ Bu belge, Alma Linux 8 üzerinde OpenLDAP sunucu ve istemci kurulumunu detaylı 
 ## Yazar
 A. Kerem Gök
 
+## Genel Bakış
+
+Bu kılavuz iki ana bölümden oluşmaktadır:
+1. OpenLDAP Sunucu Kurulumu (`server-setup.md`)
+2. OpenLDAP İstemci Kurulumu (`client-setup.md`)
+
 ## Sistem Gereksinimleri
 
 ### Sunucu
-- OS: Alma Linux 8.6
-- IP: 192.168.205.3
-- Hostname: ldapmaster.hermes.local
-- Domain: hermes.local
+- **İşletim Sistemi:** Alma Linux 8.6
+- **IP Adresi:** 192.168.205.3
+- **Hostname:** ldapmaster.hermes.local
+- **Domain:** hermes.local
+- **Şifre:** azadazad
+- **SSHA şifresi:** {SSHA}2jEeYRSHerfUNztuwVDHnQtDSKrMKrXz
 
 ### İstemci
-- OS: Alma Linux 8.6
-- IP: 192.168.205.4
-- Hostname: ldapclient.hermes.local
-- Domain: hermes.local
+- **İşletim Sistemi:** Alma Linux 8.6
+- **IP Adresi:** 192.168.205.4
+- **Hostname:** ldapclient.hermes.local
+- **Domain:** hermes.local
 
-## Temel Bilgiler
+## LDAP Terminolojisi
 
-LDAP Terminolojisi:
 - CN – Common Name (Ortak Ad)
 - O – Organizational (Organizasyonel)
 - OU – Organizational Unit (Organizasyonel Birim)
@@ -29,7 +36,9 @@ LDAP Terminolojisi:
 - DC – Domain Component (Alan Bileşeni)
 - DN – Distinguished Name (Ayırt Edici Ad)
 
-## Sunucu Kurulumu
+## Kurulum Adımları
+
+### Sunucu Kurulumu
 
 1. Sistem Güncellemeleri
    - RPM anahtarı güncelleme
@@ -59,7 +68,9 @@ LDAP Terminolojisi:
    - Test kullanıcılarının oluşturulması (kerem ve abdullah)
    - Sudo yetkilerinin yapılandırılması
 
-## İstemci Kurulumu
+Detaylı kurulum adımları için `server-setup.md` dosyasına bakınız.
+
+### İstemci Kurulumu
 
 1. Sistem Hazırlığı
    - Temel güncellemeler
@@ -78,33 +89,63 @@ LDAP Terminolojisi:
    - SSSD sudo entegrasyonu
    - nsswitch.conf düzenlemeleri
 
-## Güvenlik Notları
-
-- Tüm şifreler güvenli bir şekilde saklanmalıdır
-- SSL/TLS sertifikaları düzgün yapılandırılmalıdır
-- Sudo yetkileri dikkatli bir şekilde atanmalıdır
+Detaylı kurulum adımları için `client-setup.md` dosyasına bakınız.
 
 ## Test ve Doğrulama
 
-1. Sunucu Tarafı:
-   - LDAP servis kontrolü
-   - Kullanıcı listeleme
-   - Sudo yetkilerinin kontrolü
+### Sunucu Tarafında
+1. LDAP servisi durumunu kontrol edin
+2. Kullanıcıları listeleyin
+3. Sudo yetkilerini kontrol edin
 
-2. İstemci Tarafı:
-   - Bağlantı testi
-   - Kullanıcı girişi
-   - Sudo yetkilerinin testi
+### İstemci Tarafında
+1. LDAP bağlantısını test edin
+2. Kullanıcı girişini test edin
+3. Sudo yetkilerini test edin
+
+## Güvenlik Önlemleri
+
+1. Şifre Güvenliği
+   - Güçlü şifreler kullanın
+   - Şifreleri güvenli bir şekilde saklayın
+   - Düzenli şifre değişimi politikası uygulayın
+
+2. SSL/TLS Güvenliği
+   - Sertifikaları düzgün yapılandırın
+   - Gerekli güvenlik protokollerini kullanın
+   - Sertifikaları düzenli olarak yenileyin
+
+3. Yetkilendirme
+   - Sudo yetkilerini dikkatli atayın
+   - En az yetki prensibini uygulayın
+   - Yetkileri düzenli olarak gözden geçirin
+
+4. Ağ Güvenliği
+   - Güvenlik duvarı kurallarını doğru yapılandırın
+   - Gerekli portları açın
+   - Düzenli güvenlik denetimi yapın
 
 ## Sorun Giderme
 
-- Servis durumlarını kontrol edin
-- Log dosyalarını inceleyin
-- Güvenlik duvarı ayarlarını kontrol edin
-- Sertifika yapılandırmalarını doğrulayın
+1. Servis Sorunları
+   - Servis durumlarını kontrol edin
+   - Log dosyalarını inceleyin
+   - Yapılandırma dosyalarını kontrol edin
+
+2. Bağlantı Sorunları
+   - Ağ bağlantısını test edin
+   - DNS çözümlemesini kontrol edin
+   - Güvenlik duvarı ayarlarını kontrol edin
+
+3. Yetkilendirme Sorunları
+   - LDAP bağlantısını kontrol edin
+   - Kullanıcı yetkilerini doğrulayın
+   - SSSD yapılandırmasını kontrol edin
 
 ## Önemli Notlar
 
 - Bu kurulum kılavuzu test ortamı için hazırlanmıştır
 - Üretim ortamında daha sıkı güvenlik önlemleri alınmalıdır
-- Düzenli yedekleme ve güncelleme planı oluşturulmalıdır 
+- Düzenli yedekleme ve güncelleme planı oluşturulmalıdır
+- Tüm yapılandırma değişikliklerini belgelendirin
+- Güvenlik güncellemelerini düzenli olarak takip edin 
