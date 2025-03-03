@@ -1,105 +1,105 @@
 # Alma Linux 8 OpenLDAP İstemci Kurulumu
+# Alma Linux 8 OpenLDAP Client Installation
 
-## Yazar
+## Yazar / Author
 A. Kerem Gök
 
-## Sistem Bilgileri
+## Sistem Bilgileri / System Information
 
-- **İşletim Sistemi:** Alma Linux 8.6
-- **IP Adresi:** 192.168.205.4
-- **Hostname:** ldapclient.hermes.local
-- **Domain:** hermes.local
+- **İşletim Sistemi / Operating System:** Alma Linux 8.6
+- **IP Adresi / IP Address:** 192.168.205.4
+- **Hostname / Hostname:** ldapclient.hermes.local
+- **Domain / Domain:** hermes.local
 
-## Ön Gereksinimler
+## LDAP Terminolojisi / LDAP Terminology
 
-### LDAP Terminolojisi
-- CN – Common Name
-- O – Organizational
-- OU – Organizational Unit
-- SN – Last Name
-- DC – Domain Component
-- DN – Distinguished Name
+- CN – Common Name (Ortak Ad)
+- O – Organizational (Organizasyonel)
+- OU – Organizational Unit (Organizasyonel Birim)
+- SN – Last Name (Soyadı)
+- DC – Domain Component (Alan Bileşeni)
+- DN – Distinguished Name (Ayırt Edici Ad)
 
-## Kurulum Adımları
+## Kurulum Adımları / Installation Steps
 
-### 1. Sistem Güncellemeleri
+### 1. Sistem Güncellemeleri / System Updates
 
 ```bash
-# RPM anahtarı güncelleme
+# RPM anahtarı güncelleme / Update RPM key
 rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux
 
-# Temel paketlerin kurulumu
+# Temel paketlerin kurulumu / Install basic packages
 yum install nano wget -y
 
-# Sistem güncellemelerinin yapılması
+# Sistem güncellemelerinin yapılması / Perform system updates
 sudo dnf update -y
 
-# Gerekirse sistemi yeniden başlatma
+# Gerekirse sistemi yeniden başlatma / Reboot if necessary
 [ -f /var/run/reboot-required ] && sudo reboot -f
 ```
 
-### 2. Hostname Yapılandırması
+### 2. Hostname Yapılandırması / Hostname Configuration
 
 ```bash
-# Hostname ayarlama
+# Hostname ayarlama / Set hostname
 sudo hostnamectl set-hostname ldapclient.hermes.local
 
-# Hosts dosyasını güncelleme
+# Hosts dosyasını güncelleme / Update hosts file
 sudo echo "192.168.205.3 ldapmaster.hermes.local" >> /etc/hosts
 sudo echo "192.168.205.4 ldapclient.hermes.local" >> /etc/hosts
 
-# Hosts dosyasını kontrol etme
+# Hosts dosyasını kontrol etme / Check hosts file
 cat /etc/hosts
 ```
 
-### 3. Gerekli Paketlerin Kurulumu
+### 3. Gerekli Paketlerin Kurulumu / Required Packages Installation
 
 ```bash
-# LDAP istemci paketlerinin kurulumu
+# LDAP istemci paketlerinin kurulumu / Install LDAP client packages
 sudo dnf install openldap-clients sssd sssd-ldap oddjob-mkhomedir libsss_sudo -y
 
-# Kurulumu kontrol etme
+# Kurulumu kontrol etme / Verify installation
 rpm -qa | grep ldap
 ```
 
-### 4. Authselect Yapılandırması
+### 4. Authselect Yapılandırması / Authselect Configuration
 
 ```bash
-# Mevcut profilleri listeleme
+# Mevcut profilleri listeleme / List available profiles
 authselect list
 
-# SSSD profilini seçme
+# SSSD profilini seçme / Select SSSD profile
 sudo authselect select sssd with-mkhomedir --force
 
-# Oddjobd servisini başlatma
+# Oddjobd servisini başlatma / Start oddjobd service
 sudo systemctl enable --now oddjobd.service
 
-# Servis durumunu kontrol etme
+# Servis durumunu kontrol etme / Check service status
 systemctl status oddjobd.service
 ```
 
-### 5. OpenLDAP İstemci Yapılandırması
+### 5. OpenLDAP İstemci Yapılandırması / OpenLDAP Client Configuration
 
 ```bash
-# /etc/openldap/ldap.conf dosyasını düzenleme
+# LDAP yapılandırma dosyasını düzenleme / Edit LDAP configuration file
 sudo nano /etc/openldap/ldap.conf
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 URI ldap://ldapmaster.hermes.local
 BASE dc=hermes,dc=local
 SUDOERS_BASE ou=sudo,dc=hermes,dc=local
 ```
 
-### 6. SSSD Yapılandırması
+### 6. SSSD Yapılandırması / SSSD Configuration
 
 ```bash
-# /etc/sssd/sssd.conf dosyasını oluşturma
+# SSSD yapılandırma dosyasını oluşturma / Create SSSD configuration file
 sudo nano /etc/sssd/sssd.conf
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 [domain/default]
 id_provider = ldap
@@ -126,64 +126,70 @@ homedir_substring = /home
 ```
 
 ```bash
-# Dosya izinlerini ayarlama
+# Dosya izinlerini ayarlama / Set file permissions
 sudo chmod 0600 /etc/sssd/sssd.conf
 
-# SSSD servisini yeniden başlatma
+# SSSD servisini yeniden başlatma / Restart SSSD service
 sudo systemctl restart sssd
 
-# Servis durumunu kontrol etme
+# Servis durumunu kontrol etme / Check service status
 systemctl status sssd
 ```
 
-### 7. Bağlantı Testi
+### 7. Bağlantı Testi / Connection Test
 
 ```bash
-# LDAP kullanıcısını sorgulama
+# LDAP kullanıcısını sorgulama / Query LDAP user
 ldapsearch -x -b "uid=kerem,ou=people,dc=hermes,dc=local"
 
-# SSH ile bağlantı testi
+# SSH ile bağlantı testi / Test SSH connection
 ssh kerem@192.168.205.4
 ```
 
-### 8. Sudo Yapılandırması
+### 8. Sudo Yapılandırması / Sudo Configuration
 
 ```bash
-# nsswitch.conf dosyasını düzenleme
+# nsswitch.conf dosyasını düzenleme / Edit nsswitch.conf file
 sudo nano /etc/nsswitch.conf
 ```
 
-Aşağıdaki satırı ekleyin:
+Aşağıdaki satırı ekleyin / Add the following line:
 ```
 sudoers: files sss
 ```
 
 ```bash
-# SSSD servisini yeniden başlatma
+# SSSD servisini yeniden başlatma / Restart SSSD service
 sudo systemctl restart sssd
 ```
 
-## Test ve Doğrulama
+## Test ve Doğrulama / Testing and Verification
 
-1. Kullanıcı girişi yapın:
+1. LDAP Bağlantı Testi / LDAP Connection Test
+   ```bash
+   ldapsearch -x cn=kerem -b dc=hermes,dc=local
+   ```
+
+2. Kullanıcı Girişi / User Login
    ```bash
    ssh kerem@192.168.205.4
    ```
 
-2. Sudo yetkilerini test edin:
+3. Sudo Yetkileri / Sudo Permissions
    ```bash
    sudo -i
    ```
 
-## Sorun Giderme
+## Sorun Giderme / Troubleshooting
 
-- Servis durumlarını kontrol edin
-- Log dosyalarını inceleyin
-- Bağlantı ayarlarını doğrulayın
-- Yetkilendirme ayarlarını kontrol edin
+- Servis durumlarını kontrol edin / Check service status
+- Log dosyalarını inceleyin / Examine log files
+- Bağlantı ayarlarını doğrulayın / Verify connection settings
+- Yetkilendirme ayarlarını kontrol edin / Check authorization settings
 
-## Güvenlik Notları
+## Güvenlik Notları / Security Notes
 
-- Tüm şifreleri güvenli bir şekilde saklayın
-- SSL/TLS sertifikalarını düzgün yapılandırın
-- Sudo yetkilerini dikkatli bir şekilde atayın 
+- Tüm şifreleri güvenli bir şekilde saklayın / Store all passwords securely
+- SSL/TLS sertifikalarını düzgün yapılandırın / Configure SSL/TLS certificates properly
+- Sudo yetkilerini dikkatli bir şekilde atayın / Assign sudo permissions carefully
+- Üretim ortamında daha sıkı güvenlik önlemleri alın / Take stricter security measures in production environment 

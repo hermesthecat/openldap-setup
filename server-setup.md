@@ -1,19 +1,20 @@
 # Alma Linux 8 OpenLDAP Sunucu Kurulumu
+# Alma Linux 8 OpenLDAP Server Installation
 
-## Yazar
+## Yazar / Author
 A. Kerem Gök
 
-## Sistem Bilgileri
+## Sistem Bilgileri / System Information
 
-- **İşletim Sistemi:** Alma Linux 8.6
-- **IP Adresi:** 192.168.205.3
-- **Hostname:** ldapmaster.hermes.local
-- **Domain:** hermes.local
-- **Şifre:** azadazad
-- **SSHA şifresi:** {SSHA}2jEeYRSHerfUNztuwVDHnQtDSKrMKrXz
-- **Test Kullanıcıları:** kerem ve abdullah
+- **İşletim Sistemi / Operating System:** Alma Linux 8.6
+- **IP Adresi / IP Address:** 192.168.205.3
+- **Hostname / Hostname:** ldapmaster.hermes.local
+- **Domain / Domain:** hermes.local
+- **Şifre / Password:** azadazad
+- **SSHA şifresi / SSHA password:** {SSHA}2jEeYRSHerfUNztuwVDHnQtDSKrMKrXz
+- **Test Kullanıcıları / Test Users:** kerem ve abdullah / kerem and abdullah
 
-## LDAP Terminolojisi
+## LDAP Terminolojisi / LDAP Terminology
 
 - CN – Common Name (Ortak Ad)
 - O – Organizational (Organizasyonel)
@@ -22,84 +23,84 @@ A. Kerem Gök
 - DC – Domain Component (Alan Bileşeni)
 - DN – Distinguished Name (Ayırt Edici Ad)
 
-## Kurulum Adımları
+## Kurulum Adımları / Installation Steps
 
-### 1. Sistem Güncellemeleri
+### 1. Sistem Güncellemeleri / System Updates
 
 ```bash
-# RPM anahtarı güncelleme
+# RPM anahtarı güncelleme / Update RPM key
 rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux
 
-# Temel paketlerin kurulumu
+# Temel paketlerin kurulumu / Install basic packages
 yum install nano wget -y
 
-# Sistem güncellemelerinin yapılması
+# Sistem güncellemelerinin yapılması / Perform system updates
 sudo dnf update -y
 
-# Gerekirse sistemi yeniden başlatma
+# Gerekirse sistemi yeniden başlatma / Reboot if necessary
 [ -f /var/run/reboot-required ] && sudo reboot -f
 ```
 
-### 2. Hostname Yapılandırması
+### 2. Hostname Yapılandırması / Hostname Configuration
 
 ```bash
-# Hostname ayarlama
+# Hostname ayarlama / Set hostname
 sudo hostnamectl set-hostname ldapmaster.hermes.local
 
-# Hosts dosyasını güncelleme
+# Hosts dosyasını güncelleme / Update hosts file
 sudo echo "192.168.205.3 ldapmaster.hermes.local" >> /etc/hosts
 sudo echo "192.168.205.4 ldapclient.hermes.local" >> /etc/hosts
 
-# Hosts dosyasını kontrol etme
+# Hosts dosyasını kontrol etme / Check hosts file
 cat /etc/hosts
 ```
 
-### 3. OpenLDAP Paketlerinin Kurulumu
+### 3. OpenLDAP Paketlerinin Kurulumu / OpenLDAP Packages Installation
 
 ```bash
-# OpenLDAP repo ekleme
+# OpenLDAP repo ekleme / Add OpenLDAP repo
 sudo wget -q https://repo.symas.com/configs/SOFL/rhel8/sofl.repo -O /etc/yum.repos.d/sofl.repo
 
-# Paketlerin kurulumu
+# Paketlerin kurulumu / Install packages
 sudo dnf install symas-openldap-clients symas-openldap-servers -y
 
-# Kurulumu kontrol etme
+# Kurulumu kontrol etme / Verify installation
 rpm -qa | grep ldap
 ```
 
-### 4. SLAPD Veritabanı Yapılandırması
+### 4. SLAPD Veritabanı Yapılandırması / SLAPD Database Configuration
 
 ```bash
-# Örnek veritabanı konfigürasyonunu kopyalama
+# Örnek veritabanı konfigürasyonunu kopyalama / Copy sample database configuration
 sudo cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG 
 sudo chown ldap. /var/lib/ldap/DB_CONFIG 
 
-# SLAPD servisini etkinleştirme ve başlatma
+# SLAPD servisini etkinleştirme ve başlatma / Enable and start SLAPD service
 sudo systemctl enable --now slapd
 
-# Servis durumunu kontrol etme
+# Servis durumunu kontrol etme / Check service status
 systemctl status slapd
 ```
 
-### 5. Güvenlik Duvarı Ayarları
+### 5. Güvenlik Duvarı Ayarları / Firewall Settings
 
 ```bash
-# LDAP servislerini güvenlik duvarına ekleme
+# LDAP servislerini güvenlik duvarına ekleme / Add LDAP services to firewall
 sudo firewall-cmd --add-service={ldap,ldaps} --permanent
 sudo firewall-cmd --reload
 ```
 
-### 6. LDAP Admin Şifresi Yapılandırması
+### 6. LDAP Admin Şifresi Yapılandırması / LDAP Admin Password Configuration
 
 ```bash
-# Admin şifresi oluşturma
+# Admin şifresi oluşturma / Create admin password
 slappasswd
 
-# Root şifre güncelleme dosyası oluşturma
+# Root şifre güncelleme dosyası oluşturma / Create root password update file
 sudo nano /root/changerootpw.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: olcDatabase={0}config,cn=config
 changetype: modify
@@ -108,23 +109,23 @@ olcRootPW: {SSHA}2jEeYRSHerfUNztuwVDHnQtDSKrMKrXz
 ```
 
 ```bash
-# Şifreyi güncelleme
+# Şifreyi güncelleme / Update password
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /root/changerootpw.ldif
 ```
 
-### 7. Şema Dosyalarının İçe Aktarılması
+### 7. Şema Dosyalarının İçe Aktarılması / Schema Files Import
 
 ```bash
-# Temel şemaların import edilmesi
+# Temel şemaların import edilmesi / Import basic schemas
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
 
-# Sudo şeması ayarlaması
+# Sudo şeması ayarlaması / Setup sudo schema
 sudo cp /usr/share/doc/sudo/schema.OpenLDAP /etc/openldap/schema/sudo.schema
 ```
 
-Sudo şeması için LDIF dosyası oluşturma:
+Sudo şeması için LDIF dosyası oluşturma / Create LDIF file for sudo schema:
 ```bash
 sudo tee /etc/openldap/schema/sudo.ldif<<EOF
 dn: cn=sudo,cn=schema,cn=config
@@ -140,18 +141,18 @@ olcAttributeTypes: ( 1.3.6.1.4.1.15953.9.1.7 NAME 'sudoRunAsGroup' DESC 'Group(s
 olcObjectClasses: ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL DESC 'Sudoer Entries' MUST ( cn ) MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $ sudoRunAsGroup $ sudoOption $ description ) )
 EOF
 
-# Sudo şemasını uygulama
+# Sudo şemasını uygulama / Apply sudo schema
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/sudo.ldif
 ```
 
-### 8. Domain Yapılandırması
+### 8. Domain Yapılandırması / Domain Configuration
 
 ```bash
-# Domain güncelleme dosyası oluşturma
+# Domain güncelleme dosyası oluşturma / Create domain update file
 sudo nano /root/setdomainname.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: olcDatabase={2}mdb,cn=config
 changetype: modify
@@ -176,18 +177,18 @@ olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,c
 ```
 
 ```bash
-# Domain güncellemesini uygulama
+# Domain güncellemesini uygulama / Apply domain update
 sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f /root/setdomainname.ldif
 ```
 
-### 9. Organizasyon Birimlerinin (OU) Oluşturulması
+### 9. Organizasyon Birimlerinin (OU) Oluşturulması / Creating Organizational Units (OU)
 
 ```bash
-# OU yapılandırma dosyası oluşturma
+# OU yapılandırma dosyası oluşturma / Create OU configuration file
 sudo nano /root/adddomain.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: dc=hermes,dc=local
 objectClass: top
@@ -211,18 +212,18 @@ ou: Group
 ```
 
 ```bash
-# OU'ları oluşturma
+# OU'ları oluşturma / Create OUs
 sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/adddomain.ldif
 ```
 
-### 10. Test Kullanıcılarının Oluşturulması
+### 10. Test Kullanıcılarının Oluşturulması / Creating Test Users
 
-Kerem kullanıcısı için:
+Kerem kullanıcısı için / For Kerem user:
 ```bash
 sudo nano /root/kerem.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: uid=kerem,ou=People,dc=hermes,dc=local
 objectClass: inetOrgPerson
@@ -246,12 +247,12 @@ gidNumber: 2000
 memberUid: kerem
 ```
 
-Abdullah kullanıcısı için:
+Abdullah kullanıcısı için / For Abdullah user:
 ```bash
 sudo nano /root/abdullah.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: uid=abdullah,ou=People,dc=hermes,dc=local
 objectClass: inetOrgPerson
@@ -276,31 +277,31 @@ memberUid: abdullah
 ```
 
 ```bash
-# Kullanıcıları oluşturma
+# Kullanıcıları oluşturma / Create users
 sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/kerem.ldif
 sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/abdullah.ldif
 
-# Kullanıcıları listeleme
+# Kullanıcıları listeleme / List users
 ldapsearch -x cn=kerem -b dc=hermes,dc=local
 ldapsearch -x cn=abdullah -b dc=hermes,dc=local
 ```
 
-### 11. SSL/TLS Yapılandırması
+### 11. SSL/TLS Yapılandırması / SSL/TLS Configuration
 
 ```bash
-# Sertifika oluşturma
+# Sertifika oluşturma / Create certificate
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/ldapserver.key -out /etc/pki/tls/ldapserver.crt
 
-# Sahiplik ayarları
+# Sahiplik ayarları / Set ownership
 sudo chown ldap:ldap /etc/pki/tls/{ldapserver.crt,ldapserver.key}
 ```
 
-TLS yapılandırma dosyası oluşturma:
+TLS yapılandırma dosyası oluşturma / Create TLS configuration file:
 ```bash
 sudo nano /root/add-tls.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: cn=config
 changetype: modify
@@ -315,31 +316,31 @@ olcTLSCertificateFile: /etc/pki/tls/ldapserver.crt
 ```
 
 ```bash
-# TLS yapılandırmasını uygulama
+# TLS yapılandırmasını uygulama / Apply TLS configuration
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /root/add-tls.ldif
 
-# LDAP yapılandırma dosyasını güncelleme
+# LDAP yapılandırma dosyasını güncelleme / Update LDAP configuration file
 sudo nano /etc/openldap/ldap.conf
 ```
 
-Aşağıdaki satırı ekleyin:
+Aşağıdaki satırı ekleyin / Add the following line:
 ```
 TLS_CACERT     /etc/pki/tls/ldapserver.crt
 ```
 
 ```bash
-# Servisi yeniden başlatma
+# Servisi yeniden başlatma / Restart service
 sudo systemctl restart slapd
 ```
 
-### 12. Sudo Yapılandırması
+### 12. Sudo Yapılandırması / Sudo Configuration
 
 ```bash
-# Sudo OU oluşturma
+# Sudo OU oluşturma / Create Sudo OU
 sudo nano /root/sudoers.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: ou=sudo,dc=hermes,dc=local
 objectClass: organizationalUnit
@@ -349,16 +350,16 @@ description: my-demo LDAP SUDO Entry
 ```
 
 ```bash
-# Sudo OU'yu ekleme
+# Sudo OU'yu ekleme / Add Sudo OU
 sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/sudoers.ldif
 ```
 
-Sudo varsayılan ayarları:
+Sudo varsayılan ayarları / Sudo default settings:
 ```bash
 sudo nano /root/sudo-defaults.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: cn=defaults,ou=sudo,dc=hermes,dc=local
 objectClass: sudoRole
@@ -370,16 +371,16 @@ sudoOption: secure_path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:
 ```
 
 ```bash
-# Sudo varsayılanlarını ekleme
+# Sudo varsayılanlarını ekleme / Add sudo defaults
 sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/sudo-defaults.ldif
 ```
 
-Kerem kullanıcısına sudo yetkisi verme:
+Kerem kullanıcısına sudo yetkisi verme / Grant sudo permissions to Kerem user:
 ```bash
 sudo nano /root/sudo-kerem.ldif
 ```
 
-Aşağıdaki içeriği ekleyin:
+Aşağıdaki içeriği ekleyin / Add the following content:
 ```
 dn: cn=kerem,ou=sudo,dc=hermes,dc=local
 objectClass: sudoRole
@@ -392,33 +393,33 @@ sudoUser: kerem
 ```
 
 ```bash
-# Sudo yetkisini verme
+# Sudo yetkisini verme / Grant sudo permissions
 sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/sudo-kerem.ldif
 ```
 
-## Test ve Doğrulama
+## Test ve Doğrulama / Testing and Verification
 
-1. LDAP servisi durumunu kontrol edin:
+1. LDAP servisi durumunu kontrol edin / Check LDAP service status:
    ```bash
    systemctl status slapd
    ```
 
-2. Kullanıcıları sorgulayın:
+2. Kullanıcıları sorgulayın / Query users:
    ```bash
    ldapsearch -x cn=kerem -b dc=hermes,dc=local
    ldapsearch -x cn=abdullah -b dc=hermes,dc=local
    ```
 
-## Sorun Giderme
+## Sorun Giderme / Troubleshooting
 
-- Servis durumlarını kontrol edin
-- Log dosyalarını inceleyin
-- Güvenlik duvarı ayarlarını kontrol edin
-- Sertifika yapılandırmalarını doğrulayın
+- Servis durumlarını kontrol edin / Check service status
+- Log dosyalarını inceleyin / Examine log files
+- Güvenlik duvarı ayarlarını kontrol edin / Check firewall settings
+- Sertifika yapılandırmalarını doğrulayın / Verify certificate configurations
 
-## Güvenlik Notları
+## Güvenlik Notları / Security Notes
 
-- Tüm şifreleri güvenli bir şekilde saklayın
-- SSL/TLS sertifikalarını düzgün yapılandırın
-- Sudo yetkilerini dikkatli bir şekilde atayın
-- Üretim ortamında daha sıkı güvenlik önlemleri alın 
+- Tüm şifreleri güvenli bir şekilde saklayın / Store all passwords securely
+- SSL/TLS sertifikalarını düzgün yapılandırın / Configure SSL/TLS certificates properly
+- Sudo yetkilerini dikkatli bir şekilde atayın / Assign sudo permissions carefully
+- Üretim ortamında daha sıkı güvenlik önlemleri alın / Take stricter security measures in production environment 
