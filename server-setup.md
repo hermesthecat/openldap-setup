@@ -375,6 +375,44 @@ sudoOption: secure_path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:
 sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/sudo-defaults.ldif
 ```
 
+Abdullah kullanıcısının şifre süresini sınırsız yapma / Set Abdullah user's password to never expire:
+```bash
+ ldapmodify -x -D "cn=manager,dc=hermes,dc=local" -W <<EOF
+dn: uid=abdullah,ou=People,dc=hermes,dc=local
+changetype: modify
+replace: shadowLastChange
+shadowLastChange: 19400
+EOF
+```
+
+```bash
+ ldapmodify -x -D "cn=manager,dc=hermes,dc=local" -W <<EOF
+dn: uid=abdullah,ou=People,dc=hermes,dc=local
+changetype: modify
+replace: shadowMax
+shadowMax: 99999
+EOF
+```
+
+Kerem kullanıcısının şifre süresini sınırsız yapma / Set Kerem user's password to never expire:
+```bash
+ ldapmodify -x -D "cn=manager,dc=hermes,dc=local" -W <<EOF
+dn: uid=kerem,ou=People,dc=hermes,dc=local
+changetype: modify
+replace: shadowLastChange
+shadowLastChange: 19400
+EOF
+```
+
+```bash
+ ldapmodify -x -D "cn=manager,dc=hermes,dc=local" -W <<EOF
+dn: uid=kerem,ou=People,dc=hermes,dc=local
+changetype: modify
+replace: shadowMax
+shadowMax: 99999
+EOF
+```
+
 Kerem kullanıcısına sudo yetkisi verme / Grant sudo permissions to Kerem user:
 ```bash
 sudo nano /root/sudo-kerem.ldif

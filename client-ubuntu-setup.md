@@ -1,14 +1,14 @@
-# Alma Linux 8 OpenLDAP İstemci Kurulumu
-# Alma Linux 8 OpenLDAP Client Installation
+# Ubuntu Server 24.04 OpenLDAP İstemci Kurulumu
+# Ubuntu Server 24.04 OpenLDAP Client Installation
 
 ## Yazar / Author
 A. Kerem Gök
 
 ## Sistem Bilgileri / System Information
 
-- **İşletim Sistemi / Operating System:** Alma Linux 8.6
-- **IP Adresi / IP Address:** 192.168.205.4
-- **Hostname / Hostname:** ldapclient.hermes.local
+- **İşletim Sistemi / Operating System:** Ubuntu Server 24.04 LTS
+- **IP Adresi / IP Address:** 192.168.205.5
+- **Hostname / Hostname:** ldapclient-ubuntu.hermes.local
 - **Domain / Domain:** hermes.local
 
 ## LDAP Terminolojisi / LDAP Terminology
@@ -25,14 +25,12 @@ A. Kerem Gök
 ### 1. Sistem Güncellemeleri / System Updates
 
 ```bash
-# RPM anahtarı güncelleme / Update RPM key
-rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux
-
 # Temel paketlerin kurulumu / Install basic packages
-yum install nano wget -y
+sudo apt install nano wget -y
 
 # Sistem güncellemelerinin yapılması / Perform system updates
-sudo dnf update -y
+sudo apt update -y
+sudo apt upgrade -y
 
 # Gerekirse sistemi yeniden başlatma / Reboot if necessary
 [ -f /var/run/reboot-required ] && sudo reboot -f
@@ -42,11 +40,11 @@ sudo dnf update -y
 
 ```bash
 # Hostname ayarlama / Set hostname
-sudo hostnamectl set-hostname ldapclient.hermes.local
+sudo hostnamectl set-hostname ldapclient-ubuntu.hermes.local
 
 # Hosts dosyasını güncelleme / Update hosts file
 sudo echo "192.168.205.3 ldapmaster.hermes.local" >> /etc/hosts
-sudo echo "192.168.205.4 ldapclient.hermes.local" >> /etc/hosts
+sudo echo "192.168.205.5 ldapclient-ubuntu.hermes.local" >> /etc/hosts
 
 # Hosts dosyasını kontrol etme / Check hosts file
 cat /etc/hosts
@@ -56,33 +54,32 @@ cat /etc/hosts
 
 ```bash
 # LDAP istemci paketlerinin kurulumu / Install LDAP client packages
-sudo dnf install openldap-clients sssd sssd-ldap oddjob-mkhomedir libsss_sudo -y
-
-# Kurulumu kontrol etme / Verify installation
-rpm -qa | grep ldap
+sudo apt -y install libnss-ldapd libpam-ldapd ldap-utils libsss-sudo
 ```
 
 ### 4. Authselect Yapılandırması / Authselect Configuration
 
 ```bash
-# Mevcut profilleri listeleme / List available profiles
-authselect list
+sudo nano /etc/nsswitch.conf
+```
 
-# SSSD profilini seçme / Select SSSD profile
-sudo authselect select sssd with-mkhomedir --force
+Aşağıdaki satırları düzenleyin / Edit the following lines:
+```
+passwd:         files systemd ldap sss
+group:          files systemd ldap sss
+shadow:         files systemd ldap sss
+```
 
-# Oddjobd servisini başlatma / Start oddjobd service
-sudo systemctl enable --now oddjobd.service
-
-# Servis durumunu kontrol etme / Check service status
-systemctl status oddjobd.service
+PAM yapılandırmasını düzenleme / Edit PAM configuration:
+```bash
+sudo pam-auth-update --enable mkhomedir
 ```
 
 ### 5. OpenLDAP İstemci Yapılandırması / OpenLDAP Client Configuration
 
 ```bash
 # LDAP yapılandırma dosyasını düzenleme / Edit LDAP configuration file
-sudo nano /etc/openldap/ldap.conf
+sudo nano /etc/nslcd.conf
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
