@@ -143,7 +143,7 @@ systemctl status sssd
 ldapsearch -x -b "uid=kerem,ou=people,dc=hermes,dc=local"
 
 # SSH ile bağlantı testi / Test SSH connection
-ssh kerem@192.168.205.5
+ssh kerem@192.168.205.4
 ```
 
 ### 8. Sudo Yapılandırması / Sudo Configuration
