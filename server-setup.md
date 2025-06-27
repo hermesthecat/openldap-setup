@@ -1,7 +1,7 @@
-# Alma Linux 8 OpenLDAP Sunucu Kurulumu
-# Alma Linux 8 OpenLDAP Server Installation
+# Alma Linux 8 OpenLDAP Sunucu Kurulumu / Alma Linux 8 OpenLDAP Server Installation
 
 ## Yazar / Author
+
 A. Kerem Gök
 
 ## Sistem Bilgileri / System Information
@@ -101,7 +101,8 @@ sudo nano /root/changerootpw.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: olcDatabase={0}config,cn=config
 changetype: modify
 add: olcRootPW
@@ -126,6 +127,7 @@ sudo cp /usr/share/doc/sudo/schema.OpenLDAP /etc/openldap/schema/sudo.schema
 ```
 
 Sudo şeması için LDIF dosyası oluşturma / Create LDIF file for sudo schema:
+
 ```bash
 sudo tee /etc/openldap/schema/sudo.ldif<<EOF
 dn: cn=sudo,cn=schema,cn=config
@@ -153,7 +155,8 @@ sudo nano /root/setdomainname.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: olcDatabase={2}mdb,cn=config
 changetype: modify
 replace: olcSuffix
@@ -189,7 +192,8 @@ sudo nano /root/adddomain.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: dc=hermes,dc=local
 objectClass: top
 objectClass: dcObject
@@ -219,12 +223,14 @@ sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/adddomain.ldif
 ### 10. Test Kullanıcılarının Oluşturulması / Creating Test Users
 
 Kerem kullanıcısı için / For Kerem user:
+
 ```bash
 sudo nano /root/kerem.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: uid=kerem,ou=People,dc=hermes,dc=local
 objectClass: inetOrgPerson
 objectClass: posixAccount
@@ -248,12 +254,14 @@ memberUid: kerem
 ```
 
 Abdullah kullanıcısı için / For Abdullah user:
+
 ```bash
 sudo nano /root/abdullah.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: uid=abdullah,ou=People,dc=hermes,dc=local
 objectClass: inetOrgPerson
 objectClass: posixAccount
@@ -297,12 +305,14 @@ sudo chown ldap:ldap /etc/pki/tls/{ldapserver.crt,ldapserver.key}
 ```
 
 TLS yapılandırma dosyası oluşturma / Create TLS configuration file:
+
 ```bash
 sudo nano /root/add-tls.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: cn=config
 changetype: modify
 add: olcTLSCACertificateFile
@@ -324,7 +334,8 @@ sudo nano /etc/openldap/ldap.conf
 ```
 
 Aşağıdaki satırı ekleyin / Add the following line:
-```
+
+```bash
 TLS_CACERT     /etc/pki/tls/ldapserver.crt
 ```
 
@@ -341,7 +352,8 @@ sudo nano /root/sudoers.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: ou=sudo,dc=hermes,dc=local
 objectClass: organizationalUnit
 objectClass: top
@@ -355,12 +367,14 @@ sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/sudoers.ldif
 ```
 
 Sudo varsayılan ayarları / Sudo default settings:
+
 ```bash
 sudo nano /root/sudo-defaults.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: cn=defaults,ou=sudo,dc=hermes,dc=local
 objectClass: sudoRole
 objectClass: top
@@ -376,6 +390,7 @@ sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/sudo-defaults.ldif
 ```
 
 Abdullah kullanıcısının şifre süresini sınırsız yapma / Set Abdullah user's password to never expire:
+
 ```bash
  ldapmodify -x -D "cn=manager,dc=hermes,dc=local" -W <<EOF
 dn: uid=abdullah,ou=People,dc=hermes,dc=local
@@ -395,6 +410,7 @@ EOF
 ```
 
 Kerem kullanıcısının şifre süresini sınırsız yapma / Set Kerem user's password to never expire:
+
 ```bash
  ldapmodify -x -D "cn=manager,dc=hermes,dc=local" -W <<EOF
 dn: uid=kerem,ou=People,dc=hermes,dc=local
@@ -414,12 +430,14 @@ EOF
 ```
 
 Kerem kullanıcısına sudo yetkisi verme / Grant sudo permissions to Kerem user:
+
 ```bash
 sudo nano /root/sudo-kerem.ldif
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 dn: cn=kerem,ou=sudo,dc=hermes,dc=local
 objectClass: sudoRole
 objectClass: top
@@ -438,11 +456,13 @@ sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/sudo-kerem.ldif
 ## Test ve Doğrulama / Testing and Verification
 
 1. LDAP servisi durumunu kontrol edin / Check LDAP service status:
+
    ```bash
    systemctl status slapd
    ```
 
 2. Kullanıcıları sorgulayın / Query users:
+
    ```bash
    ldapsearch -x cn=kerem -b dc=hermes,dc=local
    ldapsearch -x cn=abdullah -b dc=hermes,dc=local
@@ -460,4 +480,4 @@ sudo ldapadd -x -D cn=Manager,dc=hermes,dc=local -W -f /root/sudo-kerem.ldif
 - Tüm şifreleri güvenli bir şekilde saklayın / Store all passwords securely
 - SSL/TLS sertifikalarını düzgün yapılandırın / Configure SSL/TLS certificates properly
 - Sudo yetkilerini dikkatli bir şekilde atayın / Assign sudo permissions carefully
-- Üretim ortamında daha sıkı güvenlik önlemleri alın / Take stricter security measures in production environment 
+- Üretim ortamında daha sıkı güvenlik önlemleri alın / Take stricter security measures in production environment

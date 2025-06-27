@@ -1,4 +1,4 @@
-## Detaylı Sudo Yetkisi / Detailed sudo permissions
+# Detaylı Sudo Yetkisi / Detailed sudo permissions
 
 Belirli Hostlara İzin Verme / Allow access to specific hosts:
 
@@ -130,8 +130,3 @@ sudoRunAsUser: www-data
 sudoRunAsUser: mysql
 sudoUser: kerem
 ```
-
-
-
-
-

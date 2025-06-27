@@ -1,12 +1,13 @@
-# OpenLDAP Kurulum Kılavuzu
-# OpenLDAP Installation Guide
+# OpenLDAP Kurulum Kılavuzu / OpenLDAP Installation Guide
 
 Bu belge, Alma Linux 8 üzerinde OpenLDAP sunucu ve istemci kurulumunu detaylı bir şekilde anlatmaktadır. / This document provides detailed instructions for installing OpenLDAP server and client on Alma Linux 8.
 
 ## Yazar / Author
+
 A. Kerem Gök
 
 ## Genel Bakış
+
 ## Overview
 
 Bu kılavuz iki ana bölümden oluşmaktadır / This guide consists of two main sections:
@@ -15,9 +16,11 @@ Bu kılavuz iki ana bölümden oluşmaktadır / This guide consists of two main 
 2. OpenLDAP İstemci Kurulumu (`client-setup.md`) / OpenLDAP Client Installation (`client-setup.md`)
 
 ## Sistem Gereksinimleri
+
 ## System Requirements
 
 ### Sunucu / Server
+
 - **İşletim Sistemi / Operating System:** Alma Linux 8.6
 - **IP Adresi / IP Address:** 192.168.205.3
 - **Hostname / Hostname:** ldapmaster.hermes.local
@@ -26,12 +29,14 @@ Bu kılavuz iki ana bölümden oluşmaktadır / This guide consists of two main 
 - **SSHA şifresi / SSHA password:** {SSHA}2jEeYRSHerfUNztuwVDHnQtDSKrMKrXz
 
 ### İstemci / Client
+
 - **İşletim Sistemi / Operating System:** Alma Linux 8.6
 - **IP Adresi / IP Address:** 192.168.205.4
 - **Hostname / Hostname:** ldapclient.hermes.local
 - **Domain / Domain:** hermes.local
 
 ## LDAP Terminolojisi
+
 ## LDAP Terminology
 
 - CN – Common Name (Ortak Ad)
@@ -42,9 +47,11 @@ Bu kılavuz iki ana bölümden oluşmaktadır / This guide consists of two main 
 - DN – Distinguished Name (Ayırt Edici Ad)
 
 ## Kurulum Adımları
+
 ## Installation Steps
 
 ### Sunucu Kurulumu
+
 ### Server Installation
 
 1. Sistem Güncellemeleri / System Updates
@@ -78,6 +85,7 @@ Bu kılavuz iki ana bölümden oluşmaktadır / This guide consists of two main 
 Detaylı kurulum adımları için `server-setup.md` dosyasına bakınız. / For detailed installation steps, please refer to `server-setup.md`.
 
 ### İstemci Kurulumu
+
 ### Client Installation
 
 1. Sistem Hazırlığı / System Preparation
@@ -97,24 +105,30 @@ Detaylı kurulum adımları için `server-setup.md` dosyasına bakınız. / For 
    - SSSD sudo entegrasyonu / SSSD sudo integration
    - nsswitch.conf düzenlemeleri / nsswitch.conf modifications
 
-Detaylı kurulum adımları için `client-setup.md` dosyasına bakınız. / For detailed installation steps, please refer to `client-setup.md`. 
+Detaylı kurulum adımları için `client-setup.md` dosyasına bakınız. / For detailed installation steps, please refer to `client-setup.md`.
 
 ## Test ve Doğrulama
+
 ## Testing and Verification
 
 ### Sunucu Tarafında
+
 ### Server Side
+
 1. LDAP servisi durumunu kontrol edin / Check LDAP service status
 2. Kullanıcıları listeleyin / List users
 3. Sudo yetkilerini kontrol edin / Check sudo permissions
 
 ### İstemci Tarafında
+
 ### Client Side
+
 1. LDAP bağlantısını test edin / Test LDAP connection
 2. Kullanıcı girişini test edin / Test user login
 3. Sudo yetkilerini test edin / Test sudo permissions
 
 ## Güvenlik Önlemleri
+
 ## Security Measures
 
 1. Şifre Güvenliği / Password Security
@@ -138,6 +152,7 @@ Detaylı kurulum adımları için `client-setup.md` dosyasına bakınız. / For 
    - Düzenli güvenlik denetimi yapın / Perform regular security audits
 
 ## Sorun Giderme
+
 ## Troubleshooting
 
 1. Servis Sorunları / Service Issues
@@ -152,14 +167,15 @@ Detaylı kurulum adımları için `client-setup.md` dosyasına bakınız. / For 
 
 3. Yetkilendirme Sorunları / Authorization Issues
    - LDAP bağlantısını kontrol edin / Check LDAP connection
-   - Kullanıcı yetkilerini doğrulayın / Verify user permissions 
+   - Kullanıcı yetkilerini doğrulayın / Verify user permissions
    - SSSD yapılandırmasını kontrol edin / Check SSSD configuration
 
 ## Önemli Notlar
+
 ## Important Notes
 
 - Bu kurulum kılavuzu test ortamı için hazırlanmıştır / This installation guide is prepared for test environment
 - Üretim ortamında daha sıkı güvenlik önlemleri alınmalıdır / Stricter security measures should be taken in production environment
 - Düzenli yedekleme ve güncelleme planı oluşturulmalıdır / Regular backup and update plan should be created
 - Tüm yapılandırma değişikliklerini belgelendirin / Document all configuration changes
-- Güvenlik güncellemelerini düzenli olarak takip edin / Follow security updates regularly 
+- Güvenlik güncellemelerini düzenli olarak takip edin / Follow security updates regularly

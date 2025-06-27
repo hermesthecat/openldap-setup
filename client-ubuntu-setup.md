@@ -1,7 +1,7 @@
-# Ubuntu Server 24.04 OpenLDAP İstemci Kurulumu
-# Ubuntu Server 24.04 OpenLDAP Client Installation
+# Ubuntu Server 24.04 OpenLDAP İstemci Kurulumu / Ubuntu Server 24.04 OpenLDAP Client Installation
 
 ## Yazar / Author
+
 A. Kerem Gök
 
 ## Sistem Bilgileri / System Information
@@ -64,13 +64,15 @@ sudo nano /etc/nsswitch.conf
 ```
 
 Aşağıdaki satırları düzenleyin / Edit the following lines:
-```
+
+```bash
 passwd:         files systemd ldap sss
 group:          files systemd ldap sss
 shadow:         files systemd ldap sss
 ```
 
 PAM yapılandırmasını düzenleme / Edit PAM configuration:
+
 ```bash
 sudo pam-auth-update --enable mkhomedir
 ```
@@ -83,7 +85,8 @@ sudo nano /etc/nslcd.conf
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 URI ldap://ldapmaster.hermes.local
 BASE dc=hermes,dc=local
 SUDOERS_BASE ou=sudo,dc=hermes,dc=local
@@ -97,7 +100,8 @@ sudo nano /etc/sssd/sssd.conf
 ```
 
 Aşağıdaki içeriği ekleyin / Add the following content:
-```
+
+```bash
 [domain/default]
 id_provider = ldap
 autofs_provider = ldap
@@ -151,7 +155,8 @@ sudo nano /etc/nsswitch.conf
 ```
 
 Aşağıdaki satırı ekleyin / Add the following line:
-```
+
+```bash
 sudoers: files sss
 ```
 
@@ -163,16 +168,19 @@ sudo systemctl restart sssd
 ## Test ve Doğrulama / Testing and Verification
 
 1. LDAP Bağlantı Testi / LDAP Connection Test
+
    ```bash
    ldapsearch -x cn=kerem -b dc=hermes,dc=local
    ```
 
 2. Kullanıcı Girişi / User Login
+
    ```bash
    ssh kerem@192.168.205.4
    ```
 
 3. Sudo Yetkileri / Sudo Permissions
+
    ```bash
    sudo -i
    ```
@@ -189,4 +197,4 @@ sudo systemctl restart sssd
 - Tüm şifreleri güvenli bir şekilde saklayın / Store all passwords securely
 - SSL/TLS sertifikalarını düzgün yapılandırın / Configure SSL/TLS certificates properly
 - Sudo yetkilerini dikkatli bir şekilde atayın / Assign sudo permissions carefully
-- Üretim ortamında daha sıkı güvenlik önlemleri alın / Take stricter security measures in production environment 
+- Üretim ortamında daha sıkı güvenlik önlemleri alın / Take stricter security measures in production environment
